@@ -28,7 +28,7 @@ class lightSector {
     
         void sendColor();
     
-        lightSector(string _ipAddress, int _portNumber, int _sectorNumber);
+        lightSector(string _ipAddress, int _portNumber, int _sectorNumber, ofColor _selfColor);
     
         string sendIP;
         int sendPort;
@@ -41,6 +41,7 @@ class lightSector {
         long long lastActivated;
         string soundFile;
     
+        ofColor selfColor;
         ofColor currentColor;
         ofColor prevColor;
     

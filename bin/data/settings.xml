@@ -1,0 +1,23 @@
+<PARAMS>
+	<NUMSECTORS>2</NUMSECTORS>
+	<SECTORS>
+		<SECTOR0>
+			<IP>192.168.1.101</IP>
+			<PORT>9998</PORT>
+			<COLOR>
+				<R>255</R>
+				<G>0</G>
+				<B>0</B>
+			</COLOR>
+		</SECTOR0>
+		<SECTOR1>
+			<IP>192.168.0.211</IP>
+			<PORT>12345</PORT>
+			<COLOR>
+				<R>0</R>
+				<G>10</G>
+				<B>240</B>
+			</COLOR>
+		</SECTOR1>
+	</SECTORS>
+</PARAMS>

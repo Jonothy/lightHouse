@@ -23,6 +23,9 @@ class ofApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
     
+        void loadParameters(string filePath);
+        void saveParameters();
+    
         ofColor globalColor();
         ofColor wheel(int WheelPos);
     
@@ -38,6 +41,8 @@ class ofApp : public ofBaseApp{
         ofSoundPlayer sounder2;
     
         int threshold;
+    
+        ofXml settings;
     
         int current_msg_string;
         string msg_strings[NUM_MSG_STRINGS];

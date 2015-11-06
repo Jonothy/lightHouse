@@ -4,12 +4,14 @@
 void ofApp::setup(){
 
     // need a xml settings to load all variables, possibly save
+    loadParameters("settings.xml");
+    
     
     numSectors = 2;
     sectors = new lightSector*[numSectors];
     
-    sectors[0] = new lightSector("192.168.0.101", 9998, 0);
-    sectors[1] = new lightSector("192.168.0.211", 12345, 1);
+    sectors[0] = new lightSector("192.168.1.101", 9998, 0, ofColor(255,0,0));
+    sectors[1] = new lightSector("192.168.0.211", 12345, 1, ofColor(0,10,240));
     
     sounder.loadSound("sounds/synth.wav");
     sounder2.loadSound("sounds/Violet.mp3");
@@ -31,6 +33,9 @@ void ofApp::setup(){
     
     threshold = 600;
     
+//    saveParameters();
+    
+//    loadParameters("settings.xml");
     ofSetFrameRate(30);
 }
 
@@ -43,11 +48,14 @@ void ofApp::update(){
         }
     }
     
+    sectors[0]->setColor(globalColor());
+    sectors[1]->setColor(globalColor());
+    
     for(int i = 0; i < numSectors; i++){
         sectors[i]->update();
     }
     
-    sectors[0]->setColor(globalColor());
+    
     
     sounder.setVolume(sectors[0]->getVolume());
     sounder2.setVolume(sectors[1]->getVolume());
@@ -190,6 +198,49 @@ void ofApp::gotMessage(ofMessage msg){
 //--------------------------------------------------------------
 void ofApp::dragEvent(ofDragInfo dragInfo){ 
 
+}
+
+void ofApp::loadParameters(string filePath) {
+    settings.load(filePath);
+    settings.setTo("PARAMS");
+    if(settings.exists("NUMSECTORS")){
+        ofLog() << "NUMSECTORS " << settings.getValue<int>("NUMSECTORS") << endl;
+        numSectors = settings.getValue<int>("NUMSECTORS");
+    }
+    settings.setTo("SECTORS");
+    for(int i = 0; i < numSectors; i++){
+        settings.setTo("SECTOR" + ofToString(i));
+        ofLog() << i << endl;
+        ofLog() << settings.getValue<string>("IP") << endl;
+        ofLog() << settings.getValue<int>("PORT") << endl;
+        settings.setTo("//SECTORS/SECTOR"+ofToString(i)+"/COLOR");
+        ofLog() << settings.getValue<int>("R") << ","
+            << settings.getValue<int>("G") << ","
+            << settings.getValue<int>("B") << endl;
+        settings.setToParent(2);
+        
+    }
+}
+
+void ofApp::saveParameters() {
+    settings.clear();
+    settings.addChild("PARAMS");
+    settings.addValue("NUMSECTORS", ofToString(numSectors));
+    settings.addChild("SECTORS");
+    settings.setTo("//SECTORS");
+    for(int i = 0; i < numSectors; i++){
+        settings.addChild("SECTOR" + ofToString(i));
+        settings.setTo("//SECTOR"+ ofToString(i));
+        settings.addValue("IP", sectors[i]->sendIP);
+        settings.addValue("PORT", ofToString(sectors[i]->sendPort));
+        settings.addChild("COLOR");
+        settings.setTo("//SECTORS/SECTOR"+ofToString(i)+"/COLOR");
+        settings.addValue("R", ofToString(int(sectors[i]->selfColor.r)));
+        settings.addValue("G", ofToString(int(sectors[i]->selfColor.g)));
+        settings.addValue("B", ofToString(int(sectors[i]->selfColor.b)));
+        settings.setToParent(2);
+    }
+    settings.save("settings.xml");
 }
 
 ofColor ofApp::globalColor(){

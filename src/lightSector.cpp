@@ -8,7 +8,7 @@
 
 #include "lightSector.h"
 
-lightSector::lightSector(string _ipAddress, int _portNumber, int _sectorNumber) {
+lightSector::lightSector(string _ipAddress, int _portNumber, int _sectorNumber, ofColor _selfColor) {
     
     sender.setup(_ipAddress, _portNumber);
     sendIP = _ipAddress;
@@ -20,6 +20,7 @@ lightSector::lightSector(string _ipAddress, int _portNumber, int _sectorNumber) 
     
     lastActivated = 0;
     timeActivated = 0;
+    selfColor = _selfColor;
     currentColor = ofColor(0,0,0);
     prevColor = ofColor(0,0,0);
 }
@@ -36,15 +37,18 @@ void lightSector::update() {
         }
         else{
             volume = ofMap(elapsed, 10000, 14000, 1.0, 0);
+            currentColor.lerp(selfColor, 1 - (elapsed-10000)/4000.0);
         }
     }
     else{
         float elapsed = currentTime - timeActivated;
         if(elapsed > 4000){
             volume = 1;
+            currentColor = selfColor;
         }
         else{
             volume = ofMap(elapsed, 0, 4000, 0.000, 1.0);
+            currentColor.lerp(selfColor, elapsed/4000.0);
         }
     }
     
