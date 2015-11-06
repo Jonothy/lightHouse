@@ -24,6 +24,7 @@ class lightSector {
         void setSector(int _sectorNumber);
         void setColor(ofColor _color);
         void setActive();
+        float getVolume();
     
         void sendColor();
     
@@ -33,6 +34,7 @@ class lightSector {
         int sendPort;
     
         int sectorNumber;
+        float volume;
     
         bool active;
         long long timeActivated;

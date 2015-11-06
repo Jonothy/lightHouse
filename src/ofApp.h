@@ -34,6 +34,8 @@ class ofApp : public ofBaseApp{
         int numSectors;
     
         ofTrueTypeFont font;
+        ofSoundPlayer sounder;
+        ofSoundPlayer sounder2;
     
         int threshold;
     

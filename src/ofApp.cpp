@@ -3,15 +3,35 @@
 //--------------------------------------------------------------
 void ofApp::setup(){
 
+    // need a xml settings to load all variables, possibly save
+    
     numSectors = 2;
     sectors = new lightSector*[numSectors];
     
-    sectors[0] = new lightSector("192.168.0.210", 12345, 0);
+    sectors[0] = new lightSector("192.168.0.101", 9998, 0);
     sectors[1] = new lightSector("192.168.0.211", 12345, 1);
     
-    receiver.setup(12346);
+    sounder.loadSound("sounds/synth.wav");
+    sounder2.loadSound("sounds/Violet.mp3");
     
-    threshold = 400;
+    sounder.setLoop(true);
+    sounder2.setLoop(true);
+    
+    sounder.setVolume(0.5f);
+    sounder2.setVolume(0.5f);
+    
+    sounder.setPan(-1.0f);
+    sounder2.setPan(1.0f);
+    
+    sounder.play();
+    sounder2.play();
+    
+    receiver.setup(9999);
+    sender.setup("localhost", 9999);
+    
+    threshold = 600;
+    
+    ofSetFrameRate(30);
 }
 
 //--------------------------------------------------------------
@@ -29,6 +49,11 @@ void ofApp::update(){
     
     sectors[0]->setColor(globalColor());
     
+    sounder.setVolume(sectors[0]->getVolume());
+    sounder2.setVolume(sectors[1]->getVolume());
+    
+    ofSoundUpdate();
+    
     // check for waiting messages
     while(receiver.hasWaitingMessages()){
         // get the next message
@@ -40,13 +65,13 @@ void ofApp::update(){
         int currentSector = ofToInt(addressParsed.back());
         int currentValue = m.getArgAsInt32(0);
 
-        if (currentValue > 400) {
+        if (currentValue > threshold) {
             sectors[currentSector]->setActive();
         }
         
         
         
-        // unrecognized message: display on the bottom of the screen
+        // messages display on the bottom of the screen
         string msg_string;
         msg_string = m.getAddress();
         msg_string += ": ";
@@ -88,10 +113,11 @@ void ofApp::draw(){
     }
 //    ofBackground(allColor);
     string buf;
-    buf = "listening for osc messages on port " + ofToString(12346);
+    buf = "listening for osc messages on port " + ofToString(9999);
     ofDrawBitmapString(buf, 10, 20);
     string currentThresh;
-    currentThresh = "threshold is at: " + ofToString(threshold);
+    currentThresh = "threshold is at: " + ofToString(threshold) + " "
+        + ofToString(sectors[0]->volume);
     ofDrawBitmapString(currentThresh, 10, 30);
     
     
@@ -132,10 +158,16 @@ void ofApp::mouseDragged(int x, int y, int button){
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button){
     ofxOscMessage m;
-    m.setAddress("/led");
-    m.addIntArg(255);
-    m.addIntArg(128);
-    m.addIntArg(0);
+    if(y > ofGetWindowWidth() / 2){
+        m.setAddress("/0");
+    }
+    else{
+        m.setAddress("/1");
+    }
+    m.addIntArg(1000);
+//    m.addIntArg(255);
+//    m.addIntArg(128);
+//    m.addIntArg(0);
     sender.sendMessage(m);
     ofLog() << "sent message" << endl;
 }

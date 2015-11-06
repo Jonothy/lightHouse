@@ -15,42 +15,36 @@ lightSector::lightSector(string _ipAddress, int _portNumber, int _sectorNumber) 
     sendPort = _portNumber;
     sectorNumber = _sectorNumber;
     
+    volume = 0.0;
     active = false;
     
+    lastActivated = 0;
+    timeActivated = 0;
     currentColor = ofColor(0,0,0);
     prevColor = ofColor(0,0,0);
-    
-    //sounder.loadSound("filename");
-    if(_sectorNumber == 0){
-        sounder.setPan(-1.0f);
-    }
-    else{
-        sounder.setPan(1.0f);
-    }
-    sounder.setVolume(0);
-    sounder.play();
 }
 
 void lightSector::update() {
+    
     long long currentTime = ofGetSystemTime();
     if(currentTime - lastActivated > 10000){
         active = false;
         float elapsed = currentTime - lastActivated;
         
-        if(elapsed > 4000){
-            sounder.setVolume(0);
+        if(elapsed > 14000){
+            volume = 0;
         }
         else{
-            sounder.setVolume(ofMap(elapsed, 0, 4000, 0.500, 0));
+            volume = ofMap(elapsed, 10000, 14000, 1.0, 0);
         }
     }
     else{
         float elapsed = currentTime - timeActivated;
         if(elapsed > 4000){
-            sounder.setVolume(0.5);
+            volume = 1;
         }
         else{
-            sounder.setVolume(ofMap(elapsed, 0, 4000, 0.000, 0.500));
+            volume = ofMap(elapsed, 0, 4000, 0.000, 1.0);
         }
     }
     
@@ -104,6 +98,10 @@ void lightSector::setActive(){
     else{
         lastActivated = currentTime;
     }
+}
+
+float lightSector::getVolume(){
+    return volume;
 }
 
 void lightSector::sendColor(){
