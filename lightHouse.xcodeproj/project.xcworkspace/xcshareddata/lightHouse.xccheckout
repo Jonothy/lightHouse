@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>4A5043C9-AEC1-4CDC-835A-0AECDAD6F15A</string>
+	<key>IDESourceControlProjectName</key>
+	<string>lightHouse</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>94A2D5288576783272BFAE22C488ED59492EFB1A</key>
+		<string>https://github.com/Jonothy/lightHouse.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>lightHouse.xcodeproj</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>94A2D5288576783272BFAE22C488ED59492EFB1A</key>
+		<string>../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://github.com/Jonothy/lightHouse.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>111</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>94A2D5288576783272BFAE22C488ED59492EFB1A</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>94A2D5288576783272BFAE22C488ED59492EFB1A</string>
+			<key>IDESourceControlWCCName</key>
+			<string>lightHouse</string>
+		</dict>
+	</array>
+</dict>
+</plist>

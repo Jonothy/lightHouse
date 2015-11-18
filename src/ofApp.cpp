@@ -4,17 +4,22 @@
 void ofApp::setup(){
 
     // need a xml settings to load all variables, possibly save
+//    loadParameters("settings.xml");
+    
+    
+//    numSectors = 2;
+//    sectors = new lightSector*[numSectors];
+    
     loadParameters("settings.xml");
     
+//    sectors[0] = new lightSector("192.168.0.177", 9998, 0, ofColor(255,0,0));
+//    sectors[1] = new lightSector("192.168.0.130", 9998, 1, ofColor(0,10,240));
+//    
+//    sectors[0]->setThreshold(600);
+//    sectors[1]->setThreshold(500);
     
-    numSectors = 2;
-    sectors = new lightSector*[numSectors];
-    
-    sectors[0] = new lightSector("192.168.1.101", 9998, 0, ofColor(255,0,0));
-    sectors[1] = new lightSector("192.168.0.211", 12345, 1, ofColor(0,10,240));
-    
-    sounder.loadSound("sounds/synth.wav");
-    sounder2.loadSound("sounds/Violet.mp3");
+    sounder.loadSound("sounds/261010__vlatkoblazek__ducks-swans-and-gulls-by-the-river.wav");
+    sounder2.loadSound("sounds/204618__jareilly__8am.wav");
     
     sounder.setLoop(true);
     sounder2.setLoop(true);
@@ -33,9 +38,8 @@ void ofApp::setup(){
     
     threshold = 600;
     
-//    saveParameters();
+    saveParameters();
     
-//    loadParameters("settings.xml");
     ofSetFrameRate(30);
 }
 
@@ -48,14 +52,10 @@ void ofApp::update(){
         }
     }
     
-    sectors[0]->setColor(globalColor());
-    sectors[1]->setColor(globalColor());
-    
     for(int i = 0; i < numSectors; i++){
+        sectors[i]->setColor(globalColor());
         sectors[i]->update();
     }
-    
-    
     
     sounder.setVolume(sectors[0]->getVolume());
     sounder2.setVolume(sectors[1]->getVolume());
@@ -71,13 +71,11 @@ void ofApp::update(){
         vector<string> addressParsed = ofSplitString(m.getAddress(), "/");
         
         int currentSector = ofToInt(addressParsed.back());
-        int currentValue = m.getArgAsInt32(0);
+        int currentValue = ofToInt(m.getArgAsString(0));
 
-        if (currentValue > threshold) {
+        if (currentValue > sectors[currentSector]->threshold) {
             sectors[currentSector]->setActive();
         }
-        
-        
         
         // messages display on the bottom of the screen
         string msg_string;
@@ -172,7 +170,7 @@ void ofApp::mousePressed(int x, int y, int button){
     else{
         m.setAddress("/1");
     }
-    m.addIntArg(1000);
+    m.addStringArg("1000");
 //    m.addIntArg(255);
 //    m.addIntArg(128);
 //    m.addIntArg(0);
@@ -206,6 +204,7 @@ void ofApp::loadParameters(string filePath) {
     if(settings.exists("NUMSECTORS")){
         ofLog() << "NUMSECTORS " << settings.getValue<int>("NUMSECTORS") << endl;
         numSectors = settings.getValue<int>("NUMSECTORS");
+        sectors = new lightSector*[numSectors];
     }
     settings.setTo("SECTORS");
     for(int i = 0; i < numSectors; i++){
@@ -213,12 +212,24 @@ void ofApp::loadParameters(string filePath) {
         ofLog() << i << endl;
         ofLog() << settings.getValue<string>("IP") << endl;
         ofLog() << settings.getValue<int>("PORT") << endl;
+        ofLog() << settings.getValue<int>("THRESHOLD") << endl;
+        
+        string tempIP = settings.getValue<string>("IP");
+        int tempPort = settings.getValue<int>("PORT");
+        int tempThreshold = settings.getValue<int>("THRESHOLD");
+        
         settings.setTo("//SECTORS/SECTOR"+ofToString(i)+"/COLOR");
         ofLog() << settings.getValue<int>("R") << ","
-            << settings.getValue<int>("G") << ","
-            << settings.getValue<int>("B") << endl;
+        << settings.getValue<int>("G") << ","
+        << settings.getValue<int>("B") << endl;
         settings.setToParent(2);
         
+        int tempR = settings.getValue<int>("R");
+        int tempG = settings.getValue<int>("G");
+        int tempB = settings.getValue<int>("B");
+        
+        sectors[i] = new lightSector(tempIP, tempPort, i, ofColor(tempR,tempG,tempB));
+        sectors[i]->threshold = tempThreshold;
     }
 }
 
@@ -233,6 +244,7 @@ void ofApp::saveParameters() {
         settings.setTo("//SECTOR"+ ofToString(i));
         settings.addValue("IP", sectors[i]->sendIP);
         settings.addValue("PORT", ofToString(sectors[i]->sendPort));
+        settings.addValue("THRESHOLD", sectors[i]->threshold);
         settings.addChild("COLOR");
         settings.setTo("//SECTORS/SECTOR"+ofToString(i)+"/COLOR");
         settings.addValue("R", ofToString(int(sectors[i]->selfColor.r)));

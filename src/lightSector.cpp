@@ -28,27 +28,28 @@ lightSector::lightSector(string _ipAddress, int _portNumber, int _sectorNumber, 
 void lightSector::update() {
     
     long long currentTime = ofGetSystemTime();
-    if(currentTime - lastActivated > 10000){
+    if(currentTime - lastActivated > 5000){
         active = false;
         float elapsed = currentTime - lastActivated;
         
-        if(elapsed > 14000){
+        if(elapsed > 7000){
             volume = 0;
         }
         else{
-            volume = ofMap(elapsed, 10000, 14000, 1.0, 0);
-            currentColor.lerp(selfColor, 1 - (elapsed-10000)/4000.0);
+            volume = ofMap(elapsed, 5000, 7000, 1.0, 0);
+            currentColor.lerp(selfColor, 1 - (elapsed-5000)/2000.0);
         }
     }
     else{
         float elapsed = currentTime - timeActivated;
-        if(elapsed > 4000){
+        if(elapsed > 2000){
             volume = 1;
             currentColor = selfColor;
+            ofLog() << int(currentColor.r) << "," << int(currentColor.g) << "," << int(currentColor.b) << endl;
         }
         else{
-            volume = ofMap(elapsed, 0, 4000, 0.000, 1.0);
-            currentColor.lerp(selfColor, elapsed/4000.0);
+            volume = ofMap(elapsed, 0, 2000, 0.000, 1.0);
+            currentColor.lerp(selfColor, elapsed/2000.0);
         }
     }
     
@@ -102,6 +103,10 @@ void lightSector::setActive(){
     else{
         lastActivated = currentTime;
     }
+}
+
+void lightSector::setThreshold(int _threshold){
+    threshold = _threshold;
 }
 
 float lightSector::getVolume(){

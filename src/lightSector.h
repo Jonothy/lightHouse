@@ -24,6 +24,7 @@ class lightSector {
         void setSector(int _sectorNumber);
         void setColor(ofColor _color);
         void setActive();
+        void setThreshold(int _threshold);
         float getVolume();
     
         void sendColor();
@@ -34,6 +35,7 @@ class lightSector {
         int sendPort;
     
         int sectorNumber;
+        int threshold;
         float volume;
     
         bool active;
