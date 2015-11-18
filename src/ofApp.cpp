@@ -222,11 +222,14 @@ void ofApp::loadParameters(string filePath) {
         ofLog() << settings.getValue<int>("R") << ","
         << settings.getValue<int>("G") << ","
         << settings.getValue<int>("B") << endl;
-        settings.setToParent(2);
         
         int tempR = settings.getValue<int>("R");
         int tempG = settings.getValue<int>("G");
         int tempB = settings.getValue<int>("B");
+        
+        settings.setToParent(2);
+        
+        
         
         sectors[i] = new lightSector(tempIP, tempPort, i, ofColor(tempR,tempG,tempB));
         sectors[i]->threshold = tempThreshold;
