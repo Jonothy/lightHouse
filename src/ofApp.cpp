@@ -4,41 +4,14 @@
 void ofApp::setup(){
 
     // need a xml settings to load all variables, possibly save
-//    loadParameters("settings.xml");
-    
-    
-//    numSectors = 2;
-//    sectors = new lightSector*[numSectors];
-    
     loadParameters("settings.xml");
-    
-//    sectors[0] = new lightSector("192.168.0.177", 9998, 0, ofColor(255,0,0));
-//    sectors[1] = new lightSector("192.168.0.130", 9998, 1, ofColor(0,10,240));
-//    
-//    sectors[0]->setThreshold(600);
-//    sectors[1]->setThreshold(500);
-    
-    sounder.loadSound("sounds/261010__vlatkoblazek__ducks-swans-and-gulls-by-the-river.wav");
-    sounder2.loadSound("sounds/204618__jareilly__8am.wav");
-    
-    sounder.setLoop(true);
-    sounder2.setLoop(true);
-    
-    sounder.setVolume(0.5f);
-    sounder2.setVolume(0.5f);
-    
-    sounder.setPan(-1.0f);
-    sounder2.setPan(1.0f);
-    
-    sounder.play();
-    sounder2.play();
     
     receiver.setup(9999);
     sender.setup("localhost", 9999);
     
     threshold = 600;
     
-    saveParameters();
+//    saveParameters();
     
     ofSetFrameRate(30);
 }
@@ -57,11 +30,6 @@ void ofApp::update(){
         sectors[i]->update();
     }
     
-    sounder.setVolume(sectors[0]->getVolume());
-    sounder2.setVolume(sectors[1]->getVolume());
-    
-    ofSoundUpdate();
-    
     // check for waiting messages
     while(receiver.hasWaitingMessages()){
         // get the next message
@@ -72,6 +40,7 @@ void ofApp::update(){
         
         int currentSector = ofToInt(addressParsed.back());
         int currentValue = ofToInt(m.getArgAsString(0));
+//        int currentValue = m.getArgAsInt32(0);
 
         if (currentValue > sectors[currentSector]->threshold) {
             sectors[currentSector]->setActive();
@@ -118,6 +87,7 @@ void ofApp::draw(){
         sectors[i]->draw();
     }
 //    ofBackground(allColor);
+    ofSetColor(0);
     string buf;
     buf = "listening for osc messages on port " + ofToString(9999);
     ofDrawBitmapString(buf, 10, 20);
@@ -134,6 +104,8 @@ void ofApp::draw(){
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
+    ofxOscMessage m, m1;
+    
     switch (key) {
             
         case OF_KEY_UP:
@@ -142,6 +114,21 @@ void ofApp::keyPressed(int key){
             
         case OF_KEY_DOWN:
             threshold -= 10;
+            break;
+            
+        case 's':
+            
+            m.setAddress("/soundfile");
+            m.addStringArg("synth.wav");
+            sender.sendMessage(m);
+            
+            break;
+            
+        case '1':
+            m1.setAddress("/sendTo");
+            m1.addStringArg("192.168.0.191");
+            sender.sendMessage(m1);
+            
             break;
     }
 }
@@ -171,9 +158,6 @@ void ofApp::mousePressed(int x, int y, int button){
         m.setAddress("/1");
     }
     m.addStringArg("1000");
-//    m.addIntArg(255);
-//    m.addIntArg(128);
-//    m.addIntArg(0);
     sender.sendMessage(m);
     ofLog() << "sent message" << endl;
 }
@@ -206,6 +190,7 @@ void ofApp::loadParameters(string filePath) {
         numSectors = settings.getValue<int>("NUMSECTORS");
         sectors = new lightSector*[numSectors];
     }
+    globalTransition = settings.getValue<int>("GLOBALTRANSITION");
     settings.setTo("SECTORS");
     for(int i = 0; i < numSectors; i++){
         settings.setTo("SECTOR" + ofToString(i));
@@ -217,6 +202,10 @@ void ofApp::loadParameters(string filePath) {
         string tempIP = settings.getValue<string>("IP");
         int tempPort = settings.getValue<int>("PORT");
         int tempThreshold = settings.getValue<int>("THRESHOLD");
+        int tempTransitionTime = settings.getValue<int>("TRANSITIONTIME");
+        int tempHoldTime = settings.getValue<int>("HOLDTIME");
+        string tempSoundFile = settings.getValue<string>("SOUND");
+        float tempMaxVolume = settings.getValue<float>("MAXVOL");
         
         settings.setTo("//SECTORS/SECTOR"+ofToString(i)+"/COLOR");
         ofLog() << settings.getValue<int>("R") << ","
@@ -233,6 +222,10 @@ void ofApp::loadParameters(string filePath) {
         
         sectors[i] = new lightSector(tempIP, tempPort, i, ofColor(tempR,tempG,tempB));
         sectors[i]->threshold = tempThreshold;
+        sectors[i]->transitionTime = tempTransitionTime;
+        sectors[i]->holdTime = tempHoldTime;
+        sectors[i]->soundFile = tempSoundFile;
+        sectors[i]->maxVolume = tempMaxVolume;
     }
 }
 
@@ -240,6 +233,7 @@ void ofApp::saveParameters() {
     settings.clear();
     settings.addChild("PARAMS");
     settings.addValue("NUMSECTORS", ofToString(numSectors));
+    settings.addValue("GLOBALTRANSITION", globalTransition);
     settings.addChild("SECTORS");
     settings.setTo("//SECTORS");
     for(int i = 0; i < numSectors; i++){
@@ -248,6 +242,10 @@ void ofApp::saveParameters() {
         settings.addValue("IP", sectors[i]->sendIP);
         settings.addValue("PORT", ofToString(sectors[i]->sendPort));
         settings.addValue("THRESHOLD", sectors[i]->threshold);
+        settings.addValue("TRANSITIONTIME", sectors[i]->transitionTime);
+        settings.addValue("HOLDTIME", sectors[i]->holdTime);
+        settings.addValue("SOUND", "Filename");
+        settings.addValue("MAXVOL", 1.0);
         settings.addChild("COLOR");
         settings.setTo("//SECTORS/SECTOR"+ofToString(i)+"/COLOR");
         settings.addValue("R", ofToString(int(sectors[i]->selfColor.r)));
@@ -261,20 +259,24 @@ void ofApp::saveParameters() {
 ofColor ofApp::globalColor(){
     long long currentTime = ofGetSystemTime();
     
-    int switcher = ofMap(currentTime % 20000, 0, 20000, 0, 255);
+    int switcher = ofMap(currentTime % globalTransition, 0, globalTransition, 0, 765);
     
-    return wheel(switcher);
+//    return wheel(switcher);
+    ofColor adjustedColor = wheel(switcher);
+    adjustedColor.setBrightness(128);
+    return adjustedColor;
 }
 
+// does a color wheel step by step
 ofColor ofApp::wheel(int WheelPos) {
-    WheelPos = 255 - WheelPos;
-    if(WheelPos < 85) {
-        return ofColor(255 - WheelPos * 3, 0, WheelPos * 3);
+    WheelPos = 765 - WheelPos;
+    if(WheelPos < 255) {
+        return ofColor(255 - WheelPos, 0, WheelPos);
     }
-    if(WheelPos < 170) {
-        WheelPos -= 85;
-        return ofColor(0, WheelPos * 3, 255 - WheelPos * 3);
+    if(WheelPos < 510) {
+        WheelPos -= 255;
+        return ofColor(0, WheelPos, 255 - WheelPos);
     }
-    WheelPos -= 170;
-    return ofColor(WheelPos * 3, 255 - WheelPos * 3, 0);
+    WheelPos -= 510;
+    return ofColor(WheelPos, 255 - WheelPos, 0);
 }

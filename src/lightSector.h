@@ -16,6 +16,8 @@ class lightSector {
     
     public:
     
+        lightSector(string _ipAddress, int _portNumber, int _sectorNumber, ofColor _selfColor);
+    
         void update();
         void draw();
         void setIP(string _ipAddress);
@@ -29,19 +31,28 @@ class lightSector {
     
         void sendColor();
     
-        lightSector(string _ipAddress, int _portNumber, int _sectorNumber, ofColor _selfColor);
+        void sendVolume();
+        void sendSoundPosition();
+    
+    
     
         string sendIP;
         int sendPort;
     
         int sectorNumber;
         int threshold;
+    
+        string soundFile;
         float volume;
+        float maxVolume;
+        float soundPosition;
     
         bool active;
         long long timeActivated;
         long long lastActivated;
-        string soundFile;
+    
+        int transitionTime;
+        int holdTime;
     
         ofColor selfColor;
         ofColor currentColor;

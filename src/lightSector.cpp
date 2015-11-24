@@ -23,37 +23,40 @@ lightSector::lightSector(string _ipAddress, int _portNumber, int _sectorNumber, 
     selfColor = _selfColor;
     currentColor = ofColor(0,0,0);
     prevColor = ofColor(0,0,0);
+    
+    transitionTime = 1000;
+    holdTime = 2000;
 }
 
 void lightSector::update() {
     
     long long currentTime = ofGetSystemTime();
-    if(currentTime - lastActivated > 5000){
+    if(currentTime - lastActivated > holdTime){
         active = false;
         float elapsed = currentTime - lastActivated;
         
-        if(elapsed > 7000){
+        if(elapsed >= holdTime+transitionTime){
             volume = 0;
         }
         else{
-            volume = ofMap(elapsed, 5000, 7000, 1.0, 0);
-            currentColor.lerp(selfColor, 1 - (elapsed-5000)/2000.0);
+            volume = ofMap(elapsed, transitionTime, transitionTime + holdTime, 1.0, 0);
+            currentColor.lerp(selfColor, 1 - (elapsed-holdTime)/(float(transitionTime)));
         }
     }
     else{
         float elapsed = currentTime - timeActivated;
-        if(elapsed > 2000){
+        if(elapsed >= transitionTime){
             volume = 1;
             currentColor = selfColor;
-            ofLog() << int(currentColor.r) << "," << int(currentColor.g) << "," << int(currentColor.b) << endl;
         }
         else{
-            volume = ofMap(elapsed, 0, 2000, 0.000, 1.0);
-            currentColor.lerp(selfColor, elapsed/2000.0);
+            volume = ofMap(elapsed, 0, transitionTime, 0.000, 1.0);
+            currentColor.lerp(selfColor, elapsed/(float(transitionTime)));
         }
     }
     
     sendColor();
+    sendVolume();
 }
 
 void lightSector::draw() {
@@ -116,8 +119,26 @@ float lightSector::getVolume(){
 void lightSector::sendColor(){
     ofxOscMessage m;
     m.setAddress("/led");
+//    m.addIntArg(int(selfColor.r));
+//    m.addIntArg(int(selfColor.g));
+//    m.addIntArg(int(selfColor.b));
+    if(sectorNumber == 0) {
+        
+    ofLog() << int(currentColor.r) << "," << int(currentColor.g) << "," << int(currentColor.b) << "--";
+    }
     m.addIntArg(int(currentColor.r));
     m.addIntArg(int(currentColor.g));
     m.addIntArg(int(currentColor.b));
     sender.sendMessage(m);
+}
+
+void lightSector::sendVolume(){
+    ofxOscMessage m;
+    m.setAddress("/volume");
+    m.addFloatArg(volume);
+    sender.sendMessage(m);
+}
+
+void lightSector::sendSoundPosition(){
+    
 }
