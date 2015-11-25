@@ -7,11 +7,12 @@ void ofApp::setup(){
     loadParameters("settings.xml");
     
     receiver.setup(9999);
+    // for debugging use - in case we want to send fake sensor info to ourselves
     sender.setup("localhost", 9999);
     
     threshold = 600;
     
-//    saveParameters();
+    saveParameters();
     
     ofSetFrameRate(30);
 }
@@ -191,6 +192,7 @@ void ofApp::loadParameters(string filePath) {
         sectors = new lightSector*[numSectors];
     }
     globalTransition = settings.getValue<int>("GLOBALTRANSITION");
+    globalBrightness = settings.getValue<int>("GLOBALBRIGHTNESS");
     settings.setTo("SECTORS");
     for(int i = 0; i < numSectors; i++){
         settings.setTo("SECTOR" + ofToString(i));
@@ -219,21 +221,17 @@ void ofApp::loadParameters(string filePath) {
         settings.setToParent(2);
         
         
-        
-        sectors[i] = new lightSector(tempIP, tempPort, i, ofColor(tempR,tempG,tempB));
-        sectors[i]->threshold = tempThreshold;
-        sectors[i]->transitionTime = tempTransitionTime;
-        sectors[i]->holdTime = tempHoldTime;
-        sectors[i]->soundFile = tempSoundFile;
-        sectors[i]->maxVolume = tempMaxVolume;
+        sectors[i] = new lightSector(tempIP, tempPort, i, tempThreshold, tempSoundFile, tempMaxVolume, tempTransitionTime, tempHoldTime, ofColor(tempR,tempG,tempB));
     }
 }
 
+// this was used to create xml template, can be re-adapted for actual saving if need be
 void ofApp::saveParameters() {
     settings.clear();
     settings.addChild("PARAMS");
     settings.addValue("NUMSECTORS", ofToString(numSectors));
     settings.addValue("GLOBALTRANSITION", globalTransition);
+    settings.addValue("GLOBALBRIGHTNESS", globalBrightness);
     settings.addChild("SECTORS");
     settings.setTo("//SECTORS");
     for(int i = 0; i < numSectors; i++){
@@ -244,8 +242,8 @@ void ofApp::saveParameters() {
         settings.addValue("THRESHOLD", sectors[i]->threshold);
         settings.addValue("TRANSITIONTIME", sectors[i]->transitionTime);
         settings.addValue("HOLDTIME", sectors[i]->holdTime);
-        settings.addValue("SOUND", "Filename");
-        settings.addValue("MAXVOL", 1.0);
+        settings.addValue("SOUND", sectors[i]->soundFile);
+        settings.addValue("MAXVOL", sectors[i]->maxVolume);
         settings.addChild("COLOR");
         settings.setTo("//SECTORS/SECTOR"+ofToString(i)+"/COLOR");
         settings.addValue("R", ofToString(int(sectors[i]->selfColor.r)));
@@ -263,7 +261,7 @@ ofColor ofApp::globalColor(){
     
 //    return wheel(switcher);
     ofColor adjustedColor = wheel(switcher);
-    adjustedColor.setBrightness(128);
+    adjustedColor.setBrightness(globalBrightness);
     return adjustedColor;
 }
 

@@ -40,6 +40,7 @@ class ofApp : public ofBaseApp{
         ofSoundPlayer **sounders;
     
         int globalTransition;
+        int globalBrightness;
         int threshold;
     
         ofXml settings;

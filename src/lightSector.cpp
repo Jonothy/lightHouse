@@ -8,7 +8,7 @@
 
 #include "lightSector.h"
 
-lightSector::lightSector(string _ipAddress, int _portNumber, int _sectorNumber, ofColor _selfColor) {
+lightSector::lightSector(string _ipAddress, int _portNumber, int _sectorNumber, int _threshold, string _soundFile, float _maxVolume, int _transitionTime, int _holdTime, ofColor _selfColor) {
     
     sender.setup(_ipAddress, _portNumber);
     sendIP = _ipAddress;
@@ -23,9 +23,10 @@ lightSector::lightSector(string _ipAddress, int _portNumber, int _sectorNumber, 
     selfColor = _selfColor;
     currentColor = ofColor(0,0,0);
     prevColor = ofColor(0,0,0);
-    
-    transitionTime = 1000;
-    holdTime = 2000;
+    threshold = _threshold;
+    maxVolume = _maxVolume;
+    transitionTime = _transitionTime;
+    holdTime = _holdTime;
 }
 
 void lightSector::update() {
@@ -39,7 +40,7 @@ void lightSector::update() {
             volume = 0;
         }
         else{
-            volume = ofMap(elapsed, transitionTime, transitionTime + holdTime, 1.0, 0);
+            volume = ofMap(elapsed, transitionTime, transitionTime + holdTime, maxVolume, 0);
             currentColor.lerp(selfColor, 1 - (elapsed-holdTime)/(float(transitionTime)));
         }
     }
@@ -50,7 +51,7 @@ void lightSector::update() {
             currentColor = selfColor;
         }
         else{
-            volume = ofMap(elapsed, 0, transitionTime, 0.000, 1.0);
+            volume = ofMap(elapsed, 0, transitionTime, 0.000, maxVolume);
             currentColor.lerp(selfColor, elapsed/(float(transitionTime)));
         }
     }
@@ -139,6 +140,7 @@ void lightSector::sendVolume(){
     sender.sendMessage(m);
 }
 
+// unimplemented as not necessary
 void lightSector::sendSoundPosition(){
     
 }

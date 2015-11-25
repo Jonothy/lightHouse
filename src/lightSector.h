@@ -16,7 +16,7 @@ class lightSector {
     
     public:
     
-        lightSector(string _ipAddress, int _portNumber, int _sectorNumber, ofColor _selfColor);
+        lightSector(string _ipAddress, int _portNumber, int _sectorNumber, int _threshold, string _soundFile, float _maxVolume, int _transitionTime, int _holdTime, ofColor _selfColor);
     
         void update();
         void draw();
